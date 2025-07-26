@@ -3,94 +3,83 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>My GCC NFTs</title>
+  <title>Welcome to GCC</title>
 
-  <meta name="description" content="View your owned GCC NFTs on BNB Chain." />
-  <meta property="og:title" content="GCC NFT Gallery" />
-  <meta property="og:description" content="Secure portal to view your owned NFTs." />
+  <!-- SEO / Meta -->
+  <meta name="description" content="Explore the GCC NFT Universe on BNB Chain." />
+  <meta property="og:title" content="GCC NFT Portal" />
+  <meta property="og:description" content="Connect your wallet to view or purchase GCC NFTs." />
   <meta property="og:type" content="website" />
-  <meta property="og:image" content="https://yourdomain.com/images/gallery-og.png" />
+  <meta property="og:image" content="https://yourdomain.com/images/og.png" />
   <meta name="apple-itunes-app" content="app-id=1438144202">
 
-  <link rel="icon" href="images/favicon.png" type="image/png" />
+  <!-- Styles -->
+  <link rel="icon" href="logo512.png" type="image/png" />
   <link rel="stylesheet" href="global.css" />
   <link rel="stylesheet" href="styles/index.css" />
 </head>
 
 <body>
   <header>
-    <h1>🖼️ Your GCC NFT Gallery</h1>
+    <h1 class="page-header">Welcome to GCC NFT Portal</h1>
     <div id="walletStatus" class="wallet-badge">Wallet not connected</div>
     <div class="wallet-buttons">
-      <button id="connectBtn" onclick="connectWallet()">🔌 Connect Wallet</button>
+      <button id="connectBtn" onclick="connectMetaMask()">🔌 Connect Wallet</button>
       <button id="disconnectBtn" class="hidden" onclick="disconnectWallet()">❌ Disconnect</button>
-    </div>
-    <div id="metamaskLink" style="display:none; margin-top: 10px;">
-      <a id="deepLink" href="#" target="_blank" rel="noopener">
-        <button>📲 Open in MetaMask App</button>
-      </a>
     </div>
   </header>
 
-  <nav class="nav-buttons">
-    <a href="index.html"><button>🏠 Home</button></a>
-    <a href="marketplace.html"><button>🛒 Marketplace</button></a>
-  </nav>
-
   <main class="container">
-    <div id="loadingState" class="loader-overlay hidden">
-      <div class="spinner"></div>
-      <p id="progressText">🔍 Scanning your NFTs...</p>
-    </div>
-
-    <h2>Owned NFTs</h2>
-    <div id="owned" class="grid-container">
-      <div class="loader">⏳ Loading your NFTs…</div>
-    </div>
+    <h2>Choose Your Path</h2>
+    <nav class="nav-buttons">
+      <a href="gallery.html"><button> View My NFTs</button></a>
+      <a href="marketplace.html"><button>Explore Marketplace</button></a>
+    </nav>
   </main>
 
   <div id="toast"></div>
 
+  <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js" defer></script>
   <script src="shared.js" defer></script>
   <script>
-    const nftContractAddress = "0x4bA7161d0FAF245c0c8bA83890c121a3D9Fe3AC9";
-    const nftABI = [
-      "function totalSupply() view returns (uint256)",
-      "function ownerOf(uint256) view returns (address)"
-    ];
+    const tokenAddress = "0x092ac429b9c3450c9909433eb0662c3b7c13cf9a";
+    const tokenSymbol = "GCC";
+    const tokenDecimals = 18;
+    const tokenImage = "https://storage.top100token.com/images/fe7c179d-bfa8-4d49-a460-ca87ca248167.webp";
+    const dexscreenerApi = `https://api.dexscreener.com/latest/dex/pairs/bsc/0x3d32d359bdad07C587a52F8811027675E4f5A833`;
 
     window.addEventListener("DOMContentLoaded", async () => {
-      if (typeof window.ethereum === 'undefined') {
-        const dappUrl = encodeURIComponent(window.location.href.replace(/^https?:\/\//, ''));
-        document.getElementById("deepLink").href = `https://metamask.app.link/dapp/${dappUrl}`;
-        document.getElementById("metamaskLink").style.display = "block";
-      }
       if (sessionStorage.getItem("walletConnected")) {
         try {
           await window.app.connect();
           updateUI(true);
-          await loadOwnedNFTs();
         } catch {
           updateUI(false);
         }
       }
     });
 
-    async function connectWallet() {
-      if (typeof window.ethereum === 'undefined') {
-        const dappUrl = encodeURIComponent(window.location.href.replace(/^https?:\/\//, ''));
-        const metamaskAppDeepLink = `https://metamask.app.link/dapp/${dappUrl}`;
-        alert("MetaMask not found. Opening MetaMask App...");
-        window.location.href = metamaskAppDeepLink;
-        return;
-      }
+    async function connectMetaMask() {
       try {
-        await window.app.connect();
-        updateUI(true);
-        await loadOwnedNFTs();
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+        if (window.ethereum) {
+          const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+          console.log("Connected wallet:", accounts[0]);
+          alert(`Connected wallet: ${accounts[0]}`);
+          await window.app.connect();
+          updateUI(true);
+        } else if (isMobile) {
+          alert("You’ll now be redirected to MetaMask to connect your wallet.");
+          const dappDomain = "gcc-nft-marketplace.onrender.com"; // ← your real domain
+          window.location.href = `https://metamask.app.link/dapp/${dappDomain}`;
+        } else {
+          alert('MetaMask is not detected. Please install it from https://metamask.io');
+        }
       } catch (err) {
-        console.error(err);
+        console.error("MetaMask connection error:", err);
+        alert("Connection failed. Please try again.");
         updateUI(false);
       }
     }
@@ -98,8 +87,6 @@
     function disconnectWallet() {
       window.app.disconnect();
       updateUI(false);
-      document.getElementById("owned").innerHTML =
-        '<p>Please reconnect your wallet to view owned NFTs.</p>';
     }
 
     function updateUI(connected) {
@@ -116,51 +103,6 @@
         connectBtn.classList.remove("hidden");
         disconnectBtn.classList.add("hidden");
       }
-    }
-
-    async function loadOwnedNFTs() {
-      const cont = document.getElementById("owned");
-      const loader = document.getElementById("loadingState");
-      const progress = document.getElementById("progressText");
-
-      loader?.classList.remove("hidden");
-      cont.innerHTML = "";
-
-      try {
-        const nft = new ethers.Contract(nftContractAddress, nftABI, window.app.provider);
-        const total = (await nft.totalSupply()).toNumber();
-
-        let found = 0;
-
-        for (let id = 0; id < total; id++) {
-          progress.textContent = `🔍 Checking NFT ${id + 1} of ${total}...`;
-
-          try {
-            const owner = await nft.ownerOf(id);
-            if (owner.toLowerCase() !== window.app.userAddress.toLowerCase()) continue;
-
-            const card = document.createElement("div");
-            card.className = "nft-card";
-            card.innerHTML = `
-              <img src="NFT/${id}.png" alt="NFT #${id}" />
-              <p><strong>Token ID:</strong> ${id}</p>
-            `;
-            cont.appendChild(card);
-            found++;
-          } catch {
-            // skip burned/nonexistent
-          }
-        }
-
-        if (found === 0) {
-          cont.innerHTML = "<p>You don’t own any GCC NFTs yet.</p>";
-        }
-      } catch (err) {
-        console.error(err);
-        cont.innerHTML = "<p>Error loading NFTs.</p>";
-      }
-
-      loader?.classList.add("hidden");
     }
   </script>
 </body>

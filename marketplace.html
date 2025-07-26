@@ -40,10 +40,15 @@
 
     <!-- 🔘  Wallet controls -->
     <div class="wallet-buttons">
-      <button id="connectBtn" type="button">🔌 Connect Wallet</button>
-      <button id="disconnectBtn" type="button" class="hidden">
+      <button id="connectBtn" onclick="connectMetaMask()">🔌 Connect Wallet</button>
+      <button id="disconnectBtn" class="hidden" onclick="disconnectWallet()">
         ❌ Disconnect
       </button>
+    </div>
+    <div id="metamaskLink" style="display:none; margin-top: 10px;">
+      <a id="deepLink" href="#" target="_blank" rel="noopener">
+        <button>📲 Open in MetaMask App</button>
+      </a>
     </div>
   </header>
 
@@ -80,6 +85,67 @@
   <!-- 📜  External scripts -->
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js" defer></script>
   <script src="shared.js" defer></script>
+  <script>
+    window.addEventListener("DOMContentLoaded", async () => {
+      const dappDomain = "gcc-nft-marketplace.onrender.com";
+      document.getElementById("deepLink").href = `https://metamask.app.link/dapp/${dappDomain}`;
+      document.getElementById("metamaskLink").style.display = "block";
+
+      if (sessionStorage.getItem("walletConnected")) {
+        try {
+          await window.app.connect();
+          updateUI(true);
+        } catch {
+          updateUI(false);
+        }
+      }
+    });
+
+    async function connectMetaMask() {
+      try {
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+        if (window.ethereum) {
+          const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+          console.log("Connected wallet:", accounts[0]);
+          alert(`Connected wallet: ${accounts[0]}`);
+          await window.app.connect();
+          updateUI(true);
+        } else if (isMobile) {
+          alert("You’ll now be redirected to MetaMask to connect your wallet.");
+          const dappDomain = "gcc-nft-marketplace.onrender.com";
+          window.location.href = `https://metamask.app.link/dapp/${dappDomain}`;
+        } else {
+          alert('MetaMask is not detected. Please install it from https://metamask.io');
+        }
+      } catch (err) {
+        console.error("MetaMask connection error:", err);
+        alert("Connection failed. Please try again.");
+        updateUI(false);
+      }
+    }
+
+    function disconnectWallet() {
+      window.app.disconnect();
+      updateUI(false);
+    }
+
+    function updateUI(connected) {
+      const status = document.getElementById("walletStatus");
+      const connectBtn = document.getElementById("connectBtn");
+      const disconnectBtn = document.getElementById("disconnectBtn");
+
+      if (connected && window.app.userAddress) {
+        status.textContent = `Connected: ${window.app.userAddress}`;
+        connectBtn.classList.add("hidden");
+        disconnectBtn.classList.remove("hidden");
+      } else {
+        status.textContent = "Wallet not connected";
+        connectBtn.classList.remove("hidden");
+        disconnectBtn.classList.add("hidden");
+      }
+    }
+  </script>
   <script src="marketplaceGlue.js" defer></script>
   <script src="marketplaceLogic.js" defer></script>
 </body>
