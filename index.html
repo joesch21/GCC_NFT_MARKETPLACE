@@ -11,10 +11,10 @@
   <meta property="og:description" content="Connect your wallet to view or purchase GCC NFTs." />
   <meta property="og:type" content="website" />
   <meta property="og:image" content="https://yourdomain.com/images/og.png" />
+  <meta name="apple-itunes-app" content="app-id=1438144202">
 
   <!-- Styles -->
   <link rel="icon" href="logo512.png" type="image/png" />
-
   <link rel="stylesheet" href="global.css" />
   <link rel="stylesheet" href="styles/index.css" />
 </head>
@@ -26,9 +26,12 @@
     <div class="wallet-buttons">
       <button id="connectBtn" onclick="connectWallet()">🔌 Connect Wallet</button>
       <button id="disconnectBtn" class="hidden" onclick="disconnectWallet()">❌ Disconnect</button>
-  </div>
-
-
+    </div>
+    <div id="metamaskLink" style="display:none; margin-top: 10px;">
+      <a id="deepLink" href="#" target="_blank" rel="noopener">
+        <button>📲 Open in MetaMask App</button>
+      </a>
+    </div>
   </header>
 
   <main class="container">
@@ -45,48 +48,59 @@
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js" defer></script>
   <script src="shared.js" defer></script>
   <script>
-  window.addEventListener("DOMContentLoaded", async () => {
-    if (sessionStorage.getItem("walletConnected")) {
+    window.addEventListener("DOMContentLoaded", async () => {
+      if (typeof window.ethereum === 'undefined') {
+        const dappUrl = encodeURIComponent(window.location.href.replace(/^https?:\/\//, ''));
+        document.getElementById("deepLink").href = `https://metamask.app.link/dapp/${dappUrl}`;
+        document.getElementById("metamaskLink").style.display = "block";
+      }
+      if (sessionStorage.getItem("walletConnected")) {
+        try {
+          await window.app.connect();
+          updateUI(true);
+        } catch {
+          updateUI(false);
+        }
+      }
+    });
+
+    async function connectWallet() {
+      if (typeof window.ethereum === 'undefined') {
+        const dappUrl = encodeURIComponent(window.location.href.replace(/^https?:\/\//, ''));
+        const metamaskAppDeepLink = `https://metamask.app.link/dapp/${dappUrl}`;
+        alert("MetaMask not found. Opening MetaMask App...");
+        window.location.href = metamaskAppDeepLink;
+        return;
+      }
       try {
         await window.app.connect();
         updateUI(true);
-      } catch {
+      } catch (err) {
+        console.error(err);
         updateUI(false);
       }
     }
-  });
 
-  async function connectWallet() {
-    try {
-      await window.app.connect();
-      updateUI(true);
-    } catch (err) {
-      console.error(err);
+    function disconnectWallet() {
+      window.app.disconnect();
       updateUI(false);
     }
-  }
 
-  function disconnectWallet() {
-    window.app.disconnect();
-    updateUI(false);
-  }
+    function updateUI(connected) {
+      const status = document.getElementById("walletStatus");
+      const connectBtn = document.getElementById("connectBtn");
+      const disconnectBtn = document.getElementById("disconnectBtn");
 
-  function updateUI(connected) {
-    const status = document.getElementById("walletStatus");
-    const connectBtn = document.getElementById("connectBtn");
-    const disconnectBtn = document.getElementById("disconnectBtn");
-
-    if (connected && window.app.userAddress) {
-      status.textContent = `Connected: ${window.app.userAddress}`;
-      connectBtn.classList.add("hidden");
-      disconnectBtn.classList.remove("hidden");
-    } else {
-      status.textContent = "Wallet not connected";
-      connectBtn.classList.remove("hidden");
-      disconnectBtn.classList.add("hidden");
+      if (connected && window.app.userAddress) {
+        status.textContent = `Connected: ${window.app.userAddress}`;
+        connectBtn.classList.add("hidden");
+        disconnectBtn.classList.remove("hidden");
+      } else {
+        status.textContent = "Wallet not connected";
+        connectBtn.classList.remove("hidden");
+        disconnectBtn.classList.add("hidden");
+      }
     }
-  }
-</script>
-
+  </script>
 </body>
 </html>
