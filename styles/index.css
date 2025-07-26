@@ -18,6 +18,53 @@ h1, h2 {
   color: #f0e130;
 }
 
+/* Header title with icon */
+.header-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 1.5rem;
+}
+.header-title::before {
+  content: '';
+  display: inline-block;
+  width: 30px; /* Adjust the size as needed */
+  height: 30px; /* Adjust the size as needed */
+  background-image: url('Frame.png');
+  background-size: cover;
+  background-position: center;
+}
+
+/* OLD
+h1, h2 {
+  text-align: center;
+  color: #f0e130;
+}
+*/
+
+/* NEW – scoped to the page header only */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 1.5rem;
+  color: #f0e130;
+  text-shadow: none;          /* override global.css shadow */
+  font-family: inherit;       /* keep index.css font */
+}
+
+.page-header::before {
+  content: '';
+  display: inline-block;
+  width: 30px;
+  height: 30px;
+  background-image: url('Frame.png');
+  background-size: cover;
+  background-position: center;
+}
+
 /* Navigation buttons */
 nav, .nav-buttons {
   display: flex;
