@@ -17,6 +17,37 @@
   <link rel="icon" href="logo512.png" type="image/png" />
   <link rel="stylesheet" href="global.css" />
   <link rel="stylesheet" href="styles/index.css" />
+
+  <!-- Ethers & Logic -->
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <script>
+    async function connectMetaMask() {
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      const dappUrl = "nft.gimpnftgallery.com";
+
+      if (isMobile && typeof window.ethereum === "undefined") {
+        window.location.href = `https://metamask.app.link/dapp/${dappUrl}`;
+        return;
+      }
+
+      try {
+        if (window.ethereum) {
+          const provider = new ethers.providers.Web3Provider(window.ethereum);
+          await provider.send("eth_requestAccounts", []);
+          const signer = provider.getSigner();
+          const address = await signer.getAddress();
+          window.app.connect();
+          updateUI(true);
+        } else {
+          alert("MetaMask not detected. Please install it from https://metamask.io");
+        }
+      } catch (err) {
+        console.error("MetaMask connection error:", err);
+        alert("Connection failed. Please try again.");
+        updateUI(false);
+      }
+    }
+  </script>
 </head>
 
 <body>
@@ -24,13 +55,8 @@
     <h1 class="page-header">Welcome to GCC NFT Portal</h1>
     <div id="walletStatus" class="wallet-badge">Wallet not connected</div>
     <div class="wallet-buttons">
-      <button id="connectBtn" onclick="connectWallet()">🔌 Connect Wallet</button>
+      <button id="connectBtn" onclick="connectMetaMask()">🔌 Connect Wallet</button>
       <button id="disconnectBtn" class="hidden" onclick="disconnectWallet()">❌ Disconnect</button>
-    </div>
-    <div id="metamaskLink" style="display:none; margin-top: 10px;">
-      <a id="deepLink" href="#" target="_blank" rel="noopener">
-        <button>📲 Open in MetaMask App</button>
-      </a>
     </div>
   </header>
 
@@ -44,16 +70,9 @@
 
   <div id="toast"></div>
 
-  <!-- Scripts -->
-  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js" defer></script>
   <script src="shared.js" defer></script>
   <script>
     window.addEventListener("DOMContentLoaded", async () => {
-      if (typeof window.ethereum === 'undefined') {
-        const dappUrl = encodeURIComponent(window.location.href.replace(/^https?:\/\//, ''));
-        document.getElementById("deepLink").href = `https://metamask.app.link/dapp/${dappUrl}`;
-        document.getElementById("metamaskLink").style.display = "block";
-      }
       if (sessionStorage.getItem("walletConnected")) {
         try {
           await window.app.connect();
@@ -63,23 +82,6 @@
         }
       }
     });
-
-    async function connectWallet() {
-      if (typeof window.ethereum === 'undefined') {
-        const dappUrl = encodeURIComponent(window.location.href.replace(/^https?:\/\//, ''));
-        const metamaskAppDeepLink = `https://metamask.app.link/dapp/${dappUrl}`;
-        alert("MetaMask not found. Opening MetaMask App...");
-        window.location.href = metamaskAppDeepLink;
-        return;
-      }
-      try {
-        await window.app.connect();
-        updateUI(true);
-      } catch (err) {
-        console.error(err);
-        updateUI(false);
-      }
-    }
 
     function disconnectWallet() {
       window.app.disconnect();
