@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Welcome to GCC</title>
+
+  <!-- SEO / Meta -->
+  <meta name="description" content="Explore the GCC NFT Universe on BNB Chain." />
+  <meta property="og:title" content="GCC NFT Portal" />
+  <meta property="og:description" content="Connect your wallet to view or purchase GCC NFTs." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://yourdomain.com/images/og.png" />
+
+  <!-- Styles -->
+  <link rel="icon" href="logo512.png" type="image/png" />
+
+  <link rel="stylesheet" href="global.css" />
+  <link rel="stylesheet" href="styles/index.css" />
+</head>
+
+<body>
+  <header>
+    <h1>🪙 Welcome to GCC NFT Portal</h1>
+    <div id="walletStatus" class="wallet-badge">Wallet not connected</div>
+    <div class="wallet-buttons">
+      <button id="connectBtn" onclick="connectWallet()">🔌 Connect Wallet</button>
+      <button id="disconnectBtn" class="hidden" onclick="disconnectWallet()">❌ Disconnect</button>
+  </div>
+
+
+  </header>
+
+  <main class="container">
+    <h2>Choose Your Path</h2>
+    <nav class="nav-buttons">
+      <a href="gallery.html"><button>🖼️ View My NFTs</button></a>
+      <a href="marketplace.html"><button>🛒 Explore Marketplace</button></a>
+    </nav>
+  </main>
+
+  <div id="toast"></div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js" defer></script>
+  <script src="shared.js" defer></script>
+  <script>
+  window.addEventListener("DOMContentLoaded", async () => {
+    if (sessionStorage.getItem("walletConnected")) {
+      try {
+        await window.app.connect();
+        updateUI(true);
+      } catch {
+        updateUI(false);
+      }
+    }
+  });
+
+  async function connectWallet() {
+    try {
+      await window.app.connect();
+      updateUI(true);
+    } catch (err) {
+      console.error(err);
+      updateUI(false);
+    }
+  }
+
+  function disconnectWallet() {
+    window.app.disconnect();
+    updateUI(false);
+  }
+
+  function updateUI(connected) {
+    const status = document.getElementById("walletStatus");
+    const connectBtn = document.getElementById("connectBtn");
+    const disconnectBtn = document.getElementById("disconnectBtn");
+
+    if (connected && window.app.userAddress) {
+      status.textContent = `Connected: ${window.app.userAddress}`;
+      connectBtn.classList.add("hidden");
+      disconnectBtn.classList.remove("hidden");
+    } else {
+      status.textContent = "Wallet not connected";
+      connectBtn.classList.remove("hidden");
+      disconnectBtn.classList.add("hidden");
+    }
+  }
+</script>
+
+</body>
+</html>

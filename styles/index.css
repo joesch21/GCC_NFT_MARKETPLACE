@@ -1,0 +1,128 @@
+/* index.css — global and page-specific styles for Marketplace & Gallery */
+
+/* Global resets and typography */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+body {
+  background-color: #121212;
+  color: #eee;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.4;
+  padding: 1rem;
+}
+h1, h2 {
+  text-align: center;
+  color: #f0e130;
+}
+
+/* Navigation buttons */
+nav, .nav-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+nav button, .nav-buttons button {
+  background: linear-gradient(90deg, #8739f9, #9f52ff);
+  border: none;
+  color: #fff;
+  padding: 0.8rem 1.2rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+nav button:hover, .nav-buttons button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 12px rgba(159, 82, 255, 0.6);
+}
+
+/* Grid containers for owned & marketplace */
+#myNFTs,
+#marketplace {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  padding: 1rem 2rem;
+}
+
+/* NFT card */
+.nft-card {
+  background-color: #1e1e1e;
+  border: 2px solid #333;
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.nft-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 0 10px rgba(135, 57, 249, 0.7);
+}
+.nft-card img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+.nft-card p {
+  margin: 0.5rem 0;
+  font-size: 0.9rem;
+  color: #ddd;
+}
+.nft-card input {
+  width: calc(100% - 1.5rem);
+  padding: 0.5rem;
+  margin: 0.5rem 0;
+  border: 1px solid #555;
+  border-radius: 6px;
+  background: #2a2a2a;
+  color: #eee;
+}
+.nft-card button {
+  width: 90%;
+  padding: 0.6rem;
+  margin-bottom: 0.8rem;
+  background: #8739f9;
+  border: none;
+  color: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: background 0.2s;
+}
+.nft-card button:hover {
+  background: #9f52ff;
+}
+
+/* Section headings spacing */
+h2 {
+  margin-top: 2rem;
+  font-size: 1.5rem;
+  border-bottom: 2px solid #8739f9;
+  padding-bottom: 0.4rem;
+}
+
+/* Loader styling */
+.loader {
+  grid-column: 1 / -1;
+  text-align: center;
+  font-size: 1.2rem;
+  color: #ccc;
+}
+
+/* Responsive tweaks */
+@media (max-width: 600px) {
+  #myNFTs, #marketplace {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    padding: 1rem;
+  }
+  nav button, .nav-buttons button {
+    font-size: 0.9rem;
+    padding: 0.6rem 1rem;
+  }
+}

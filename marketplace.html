@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- 🛡️  CSP: only self + jsdelivr CDN -->
+  <meta http-equiv="Content-Security-Policy"
+        content="script-src 'self' https://cdn.jsdelivr.net/npm/;" />
+
+  <!-- 🔍  SEO & social -->
+  <title>GCC NFT Marketplace – Buy & Sell on BNB Chain</title>
+  <meta name="description"
+        content="Discover, buy and sell GCC NFTs on the BNB Chain." />
+  <meta property="og:title" content="GCC NFT Marketplace" />
+  <meta property="og:description"
+        content="Securely trade listed NFTs from the GCC community." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image"
+        content="https://yourdomain.com/images/og.png" />
+
+  <!-- ⚡  Base & assets -->
+  <base href="/" />
+  <link rel="icon" href="logo512.png" type="image/png" />
+
+  <link rel="preload" href="styles/marketplace.css" as="style" />
+  <link rel="stylesheet" href="global.css" />
+  <link rel="stylesheet" href="styles/marketplace.css" />
+</head>
+
+<body>
+  <!-- 🎩  Header -->
+  <header>
+    <h1>🛒 GCC NFT Marketplace</h1>
+
+    <!-- 🔗  Wallet status -->
+    <div id="walletStatus" class="wallet-badge" aria-live="polite">
+      Wallet not connected
+    </div>
+
+    <!-- 🔘  Wallet controls -->
+    <div class="wallet-buttons">
+      <button id="connectBtn" type="button">🔌 Connect Wallet</button>
+      <button id="disconnectBtn" type="button" class="hidden">
+        ❌ Disconnect
+      </button>
+    </div>
+  </header>
+
+  <!-- 🧭  Navigation -->
+  <nav class="nav-buttons">
+    <a href="index.html">
+      <button type="button">🏠 Home</button>
+    </a>
+    <a href="gallery.html">
+      <button type="button">🖼️ My NFTs</button>
+    </a>
+  </nav>
+
+  <!-- 📦  Main content -->
+  <main class="container">
+    <!-- 🌀  Loader overlay -->
+    <section id="loadingState" class="loader-overlay hidden" aria-hidden="true">
+      <div class="spinner"></div>
+      <p id="progressText">🔍 Loading marketplace…</p>
+    </section>
+
+    <!-- 🖼️  Listings -->
+    <section aria-labelledby="listingsHeading">
+      <h2 id="listingsHeading">Listed NFTs for Sale</h2>
+      <div id="marketplace" class="grid-container">
+        <div class="loader">⏳ Loading listings…</div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 🍞  Toast notifications -->
+  <div id="toast" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- 📜  External scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js" defer></script>
+  <script src="shared.js" defer></script>
+  <script src="marketplaceGlue.js" defer></script>
+  <script src="marketplaceLogic.js" defer></script>
+</body>
+</html>

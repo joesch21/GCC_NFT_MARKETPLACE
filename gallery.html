@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My GCC NFTs</title>
+
+  <meta name="description" content="View your owned GCC NFTs on BNB Chain." />
+  <meta property="og:title" content="GCC NFT Gallery" />
+  <meta property="og:description" content="Secure portal to view your owned NFTs." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://yourdomain.com/images/gallery-og.png" />
+
+  <link rel="icon" href="images/favicon.png" type="image/png" />
+  <link rel="stylesheet" href="global.css" />
+  <link rel="stylesheet" href="styles/index.css" />
+</head>
+
+<body>
+  <header>
+    <h1>🖼️ Your GCC NFT Gallery</h1>
+    <div id="walletStatus" class="wallet-badge">Wallet not connected</div>
+    <div class="wallet-buttons">
+      <button id="connectBtn" onclick="connectWallet()">🔌 Connect Wallet</button>
+      <button id="disconnectBtn" class="hidden" onclick="disconnectWallet()">❌ Disconnect</button>
+    </div>
+  </header>
+
+  <nav class="nav-buttons">
+    <a href="index.html"><button>🏠 Home</button></a>
+    <a href="marketplace.html"><button>🛒 Marketplace</button></a>
+  </nav>
+
+  <main class="container">
+    <div id="loadingState" class="loader-overlay hidden">
+  <div class="spinner"></div>
+  <p id="progressText">🔍 Scanning your NFTs...</p>
+</div>
+
+    <h2>Owned NFTs</h2>
+    <div id="owned" class="grid-container">
+      <div class="loader">⏳ Loading your NFTs…</div>
+    </div>
+  </main>
+
+  <div id="toast"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js" defer></script>
+  <script src="shared.js" defer></script>
+  <script>
+    const nftContractAddress = "0x4bA7161d0FAF245c0c8bA83890c121a3D9Fe3AC9";
+    const nftABI = [
+      "function totalSupply() view returns (uint256)",
+      "function ownerOf(uint256) view returns (address)"
+    ];
+
+    window.addEventListener("DOMContentLoaded", async () => {
+      if (sessionStorage.getItem("walletConnected")) {
+        try {
+          await window.app.connect();
+          updateUI(true);
+          await loadOwnedNFTs();
+        } catch {
+          updateUI(false);
+        }
+      }
+    });
+
+    async function connectWallet() {
+      try {
+        await window.app.connect();
+        updateUI(true);
+        await loadOwnedNFTs();
+      } catch (err) {
+        console.error(err);
+        updateUI(false);
+      }
+    }
+
+    function disconnectWallet() {
+      window.app.disconnect();
+      updateUI(false);
+      document.getElementById("owned").innerHTML =
+        '<p>Please reconnect your wallet to view owned NFTs.</p>';
+    }
+
+    function updateUI(connected) {
+      const status = document.getElementById("walletStatus");
+      const connectBtn = document.getElementById("connectBtn");
+      const disconnectBtn = document.getElementById("disconnectBtn");
+
+      if (connected && window.app.userAddress) {
+        status.textContent = `Connected: ${window.app.userAddress}`;
+        connectBtn.classList.add("hidden");
+        disconnectBtn.classList.remove("hidden");
+      } else {
+        status.textContent = "Wallet not connected";
+        connectBtn.classList.remove("hidden");
+        disconnectBtn.classList.add("hidden");
+      }
+    }
+
+    async function loadOwnedNFTs() {
+  const cont = document.getElementById("owned");
+  const loader = document.getElementById("loadingState");
+  const progress = document.getElementById("progressText");
+
+  loader?.classList.remove("hidden");
+  cont.innerHTML = "";
+
+  try {
+    const nft = new ethers.Contract(nftContractAddress, nftABI, window.app.provider);
+    const total = (await nft.totalSupply()).toNumber();
+
+    let found = 0;
+
+    for (let id = 0; id < total; id++) {
+      progress.textContent = `🔍 Checking NFT ${id + 1} of ${total}...`;
+
+      try {
+        const owner = await nft.ownerOf(id);
+        if (owner.toLowerCase() !== window.app.userAddress.toLowerCase()) continue;
+
+        const card = document.createElement("div");
+        card.className = "nft-card";
+        card.innerHTML = `
+          <img src="NFT/${id}.png" alt="NFT #${id}" />
+          <p><strong>Token ID:</strong> ${id}</p>
+        `;
+        cont.appendChild(card);
+        found++;
+      } catch {
+        // skip burned/nonexistent
+      }
+    }
+
+    if (found === 0) {
+      cont.innerHTML = "<p>You don’t own any GCC NFTs yet.</p>";
+    }
+  } catch (err) {
+    console.error(err);
+    cont.innerHTML = "<p>Error loading NFTs.</p>";
+  }
+
+  loader?.classList.add("hidden");
+}
+
+  </script>
+</body>
+</html>
